@@ -115,9 +115,9 @@ fn build_cube_mesh() -> Mesh {
 fn generate_world(mut game_state: ResMut<GameState>) {
     let generator = ChunkGenerator::new();
 
-    for x in 0..1 {
-        for z in 0..1 {
-            let block_array = generator.generate();
+    for x in 0..4 {
+        for z in 0..4 {
+            let block_array = generator.generate(x, z);
             game_state.chunks.insert([x, z], block_array);
         }
     }
