@@ -40,10 +40,10 @@ impl MeshBuilder for ChunkMeshGenerator {
 
         let face: &Face = &FACES[face_kind];
         let tex_coord = block_kind.get_tex_coord(&face.kind);
+        let x_offset = (CHUNK_WIDTH/ 2) as f32;
+        let z_offset = (CHUNK_LENGTH / 2) as f32;
 
         for vert in &face.vertices  {
-            let x_offset = (CHUNK_WIDTH/ 2) as f32;
-            let z_offset = (CHUNK_LENGTH / 2) as f32;
             let x = vert.position[Vector::X] + coord[Vector::X] - x_offset; 
             let y = vert.position[Vector::Y] + coord[Vector::Y];
             let z = vert.position[Vector::Z] + coord[Vector::Z] - z_offset;
@@ -56,14 +56,8 @@ impl MeshBuilder for ChunkMeshGenerator {
             self.uvs.push([u, v]);
         }
 
-        let mut arr=TRIANGLES.clone();
-        self.indicies.extend_from_slice({
-            for i in &mut arr {
-                *i += 4 * self.face_count;
-            }
-            &arr
-        });
-
+        let offset = 4 * self.face_count;
+        self.indicies.extend(TRIANGLES.iter().map(|x| x + offset));
         self.face_count += 1;
     }
 
