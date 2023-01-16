@@ -1,8 +1,12 @@
 use std::ops::Add;
 
 use bevy::{prelude::Mesh, render::{render_resource::PrimitiveTopology, mesh::Indices}};
-use noise::{OpenSimplex};
 use crate::constants::*;
+use noise::{
+    core::perlin::{perlin_2d, perlin_3d}, 
+    permutationtable::PermutationTable, 
+    core::simplex::simplex_3d,
+};
 
 pub struct ChunkGenerator {
     position: [f64; 3],
