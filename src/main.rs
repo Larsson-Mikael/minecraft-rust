@@ -111,6 +111,45 @@ fn build_cube_mesh() -> Mesh {
     mesh
 }
 
+fn generate_cube_mesh(
+    mut commands: Commands, 
+    mut meshes: ResMut< Assets<Mesh> >, 
+    mut materials: ResMut<Assets<StandardMaterial>>
+) {
+    let material = materials.add(StandardMaterial {
+        base_color: Color::LIME_GREEN,
+        unlit: true,
+        ..default()
+    });
+
+    let mut mesh_generator = ChunkMeshGenerator::new();
+
+    mesh_generator.add_face([0., 0., 0.], &FaceKind::Front, &BlockKind::GRASS);
+    mesh_generator.add_face([0., 0., 0.], &FaceKind::Back, &BlockKind::GRASS);
+    mesh_generator.add_face([0., 0., 0.], &FaceKind::Left, &BlockKind::GRASS);
+    mesh_generator.add_face([0., 0., 0.], &FaceKind::Right, &BlockKind::GRASS);
+    mesh_generator.add_face([0., 0., 0.], &FaceKind::Top, &BlockKind::GRASS);
+    mesh_generator.add_face([0., 0., 0.], &FaceKind::Bottom, &BlockKind::GRASS);
+
+    commands.spawn((
+        PbrBundle {
+            mesh: meshes.add(mesh_generator.build()),
+            material: material.clone(),
+            transform: Transform {
+                translation: Vec3::new(0., 0., 0.),
+                rotation: Quat::from_euler(EulerRot::XYZ, 0., 0., 0.),
+                scale: Vec3::new(1., 1., 1.)
+            },
+            ..default()
+        },
+        Rotate,
+        Wireframe
+    ));
+
+
+
+}
+
 
 fn generate_world(mut game_state: ResMut<GameState>) {
     let generator = ChunkGenerator::new();
