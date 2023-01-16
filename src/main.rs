@@ -237,7 +237,6 @@ fn generate_mesh(
                 ..default()
             },
             Wireframe,
-            Rotate
         ));
     }
 
