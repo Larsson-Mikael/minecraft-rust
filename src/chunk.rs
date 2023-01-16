@@ -37,15 +37,18 @@ impl ChunkMeshGenerator {
 
 impl MeshBuilder for ChunkMeshGenerator {
     fn add_face(&mut self, coord: [f32; 3], face_kind: &FaceKind, block_kind: &BlockKind) {
+
         let face: &Face = &FACES[face_kind];
         let tex_coord = block_kind.get_tex_coord(&face.kind);
 
         for vert in &face.vertices  {
-            let x = vert.position[Vector::X] + coord[Vector::X]; 
+            let x_offset = (CHUNK_WIDTH/ 2) as f32;
+            let z_offset = (CHUNK_LENGTH / 2) as f32;
+            let x = vert.position[Vector::X] + coord[Vector::X] - x_offset; 
             let y = vert.position[Vector::Y] + coord[Vector::Y];
-            let z = vert.position[Vector::Z] + coord[Vector::Z];
+            let z = vert.position[Vector::Z] + coord[Vector::Z] - z_offset;
 
-            let u = ((vert.uv[0] + tex_coord[0]) * ATLAS_OFFSET / ATLAS_HEIGHT) as f32;
+            let u = ((vert.uv[0] + tex_coord[0]) * ATLAS_OFFSET / ATLAS_WIDTH) as f32;
             let v = ((vert.uv[1] + tex_coord[1]) * ATLAS_OFFSET / ATLAS_HEIGHT) as f32;
 
             self.vertices.push([x, y, z]);
