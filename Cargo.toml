@@ -7,6 +7,7 @@ edition = "2021"
 
 [dependencies]
 bevy = "0.9.0"
+bevy_flycam = "*"
 noise = "0.8"
 configparser = "3.0.2"
 

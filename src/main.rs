@@ -12,6 +12,7 @@ use bevy::{
     render::{render_resource::PrimitiveTopology, settings::{WgpuSettings, WgpuFeatures}},
     render::{*, mesh::Indices}, log::{LogPlugin, Level},
 };
+use bevy_flycam::{PlayerPlugin, FlyCam, MovementSettings};
 
 use constants::*;
 use utils::*;
@@ -25,10 +26,13 @@ struct GameState {
 
 fn main() {
     App::new()
-        .add_startup_system(generate_world)
         .insert_resource(WgpuSettings {
             features: WgpuFeatures::POLYGON_MODE_LINE,
             ..default()
+        })
+        .insert_resource(MovementSettings {
+            sensitivity: 0.00012,
+            speed: 48.0,
         })
         .add_plugins( DefaultPlugins.set(
             WindowPlugin {
@@ -46,10 +50,11 @@ fn main() {
             })
             .set(LogPlugin {
                 filter: "".to_string(),
-                level: Level::WARN,
+                level: Level::ERROR,
             })
         )
         .add_plugin(WireframePlugin)
+        .add_plugin(PlayerPlugin)
         .insert_resource(GameState {
             seed: "asdf".to_string(),
             chunks: HashMap::new(),
