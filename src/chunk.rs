@@ -133,7 +133,7 @@ pub struct Block {
     pub is_placed: bool,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum BlockKind {
     AIR,
     GRASS,
@@ -144,15 +144,15 @@ impl BlockKind {
         match self {
             BlockKind::GRASS => {
                 match face {
-                    FaceKind::Left => [2., 11.],
-                    FaceKind::Right => [2., 11.],
-                    FaceKind::Front => [2., 11.],
-                    FaceKind::Back => [2., 11.],
-                    FaceKind::Top => [14., 1.],
-                    FaceKind::Bottom => [9., 6.],
+                    FaceKind::Left => [1., 10.],
+                    FaceKind::Right => [1., 10.],
+                    FaceKind::Front => [1., 10.],
+                    FaceKind::Back => [1., 10.],
+                    FaceKind::Top => [14., 10.],
+                    FaceKind::Bottom => [2., 5.],
                 }
             },
-            _ => [-1., -1.] 
+            _ => [22., 0.] 
         }
     }
 }

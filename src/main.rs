@@ -130,8 +130,10 @@ fn generate_mesh(
     mut meshes: ResMut< Assets<Mesh> >,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
+    let atlas = asset_server.load("atlas.png");
+
     let material = materials.add(StandardMaterial {
-        base_color: Color::LIME_GREEN,
+        base_color_texture: Some(atlas),
         unlit: true,
         ..default()
     });
