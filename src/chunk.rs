@@ -81,13 +81,35 @@ impl ChunkGenerator {
         }
     }
 
-    pub fn generate(&self) -> BlockArray {
+    pub fn generate(&self, chunk_x: u64, chunk_z: u64) -> BlockArray {
         let mut blocks = Vec::new();
-        for _ in 0..CHUNK_MAX_BLOCK {
-            blocks.push(Block {
-                kind: BlockKind::GRASS,
-                is_placed: true,
-            })
+        let hasher = PermutationTable::new(0);
+
+
+        for y in 0..CHUNK_HEIGHT {
+            for z in 0..CHUNK_WIDTH {
+                for x in 0..CHUNK_LENGTH {
+                    let n_x = (x * chunk_x) as f64 / CHUNK_LENGTH as f64;
+                    let n_y = y as f64 / CHUNK_HEIGHT as f64;
+                    let n_z = (z * chunk_z) as f64  / CHUNK_WIDTH as f64;
+                    let mut height = perlin_2d([n_x, n_z], &hasher) * CHUNK_HEIGHT as f64;
+                    noise::Perlin
+                    let val = perlin_3d([n_x, n_y, n_z], &hasher);
+
+                    if val > 0.1 {
+                        blocks.push(Block {
+                            kind: BlockKind::GRASS,
+                            is_placed: false,
+                        });
+                    } else {
+                        blocks.push(Block {
+                            kind: BlockKind::AIR,
+                            is_placed: false,
+                        });
+                    }
+
+                }
+            }
         }
 
         BlockArray {blocks, current: 0}
