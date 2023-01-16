@@ -144,30 +144,44 @@ fn generate_mesh(
             for z in 0..CHUNK_WIDTH {
                 for x in 0..CHUNK_LENGTH {
                     let pos = Vec3::from([x as f32, y as f32, z as f32]);
-                    let current_block = chunk.get_block(pos.x.into(), pos.y.into(), pos.z.into()).expect("NO BLOCK FOUND LOL");
+                    let current_block = chunk.get_block(pos.x.into(), pos.y.into(), pos.z.into()).unwrap();
+
+                    if current_block.kind == BlockKind::AIR {
+                        continue;
+                    }
 
                     for i in 0..FACES.len() {
                         let face = &FACES[i];
                         let normal = Vec3::from(face.normal);
                         let dir = pos.add(normal);
 
-                        let neighbor = chunk.get_block(dir.x.into(), dir.y.into(), dir.z.into());
-
                         if !OPTIMIZED_MESH {
                             mesh_generator.add_face([x as f32, y as f32, z as f32], &face.kind, &current_block.kind);
                             break;
                         }
 
-                        if let None = neighbor {
-                            mesh_generator.add_face([x as f32, y as f32, z as f32], &face.kind, &current_block.kind)
-                        }                     
+                        let neighbor = chunk.get_block(dir.x.into(), dir.y.into(), dir.z.into());
+                        match neighbor {
+                            Some(block) => {
+                                match block.kind {
+                                    BlockKind::AIR => {
+                                        mesh_generator.add_face([x as f32, y as f32, z as f32], &face.kind, &current_block.kind);
+                                        continue;
+                                    },
+                                    _ => {}
+                                }
+                            },
+                            None => {
+                                mesh_generator.add_face([x as f32, y as f32, z as f32], &face.kind, &current_block.kind);
+                                continue;
+                            },
+                        }
                     }
                 }
             }
         }
 
         println!("FACE COUNT: {}", mesh_generator.face_count);
-
         commands.spawn((
             PbrBundle {
                 mesh: meshes.add(mesh_generator.build()),
