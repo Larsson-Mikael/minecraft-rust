@@ -100,7 +100,6 @@ impl ChunkGenerator {
                     let n_y = y as f64 / CHUNK_HEIGHT as f64;
                     let n_z = (z * chunk_z) as f64  / CHUNK_WIDTH as f64;
                     let mut height = perlin_2d([n_x, n_z], &hasher) * CHUNK_HEIGHT as f64;
-                    noise::Perlin
                     let val = perlin_3d([n_x, n_y, n_z], &hasher);
 
                     if val > 0.1 {
