@@ -262,15 +262,6 @@ fn setup(mut commands: Commands) {
         transform: Transform::from_xyz(8.0, 26.0, 26.0),
         ..default()
     });
-
-    commands.spawn((Camera3dBundle {
-        transform: Transform {
-            translation: Vec3::new(0., -30., 20.),
-            rotation: Quat::from_euler(EulerRot::XYZ, 0., 0., 0.),
-            ..default()
-        },
-        ..default()
-    }, UpDown));
 }
 
 fn update_up_down(mut q: Query<&mut Transform, With<UpDown>>, time: Res<Time>) {
