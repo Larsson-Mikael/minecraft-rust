@@ -60,7 +60,9 @@ fn main() {
             chunks: HashMap::new(),
 
         })
-        .add_startup_system(generate_mesh)
+        .add_startup_system(generate_world)
+        // .add_startup_system(generate_cube_mesh)
+        .add_startup_system(generate_mesh.after(generate_world))
         .add_startup_system(setup)
         .add_system(update_up_down)
         .add_system(rotate)
