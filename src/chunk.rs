@@ -1,8 +1,6 @@
-use std::ops::Add;
-
 use bevy::{prelude::Mesh, render::{render_resource::PrimitiveTopology, mesh::Indices}};
 use crate::constants::*;
-use noise::{ Perlin, Seedable, NoiseFn };
+use noise::{ Perlin, NoiseFn };
 
 pub struct ChunkGenerator {
     position: [f64; 3],

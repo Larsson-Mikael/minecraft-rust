@@ -1,4 +1,4 @@
-use std::ops::{Index, self};
+use std::ops::{Index};
 
 impl Index<&FaceKind> for [Face; 6] {
     type Output = Face;
@@ -72,10 +72,6 @@ impl Index<Vector> for [u64; 3] {
 }
 
 pub const TRIANGLES: [u32; 6] = [0, 1, 2, 2, 1, 3];
-
-const V_MIN: f32 = -0.5;
-const V_MAX: f32 = 0.5;
-
 pub const FACES: [Face; 6] = [
     Face {
         kind: FaceKind::Left,

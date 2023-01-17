@@ -3,19 +3,17 @@ mod config;
 mod utils;
 mod chunk;
 
-use std::{collections::HashMap, f32::consts::PI, ops::Add};
+use std::{collections::HashMap};
 
 use bevy::{
     prelude::*,
-    window::WindowResized, 
-    pbr::wireframe::{Wireframe, WireframeConfig, WireframePlugin},
+    pbr::wireframe::{Wireframe, WireframePlugin},
     render::{render_resource::PrimitiveTopology, settings::{WgpuSettings, WgpuFeatures}},
-    render::{*, mesh::Indices}, log::{LogPlugin, Level},
+    render::{mesh::Indices}, log::{LogPlugin, Level},
 };
-use bevy_flycam::{PlayerPlugin, FlyCam, MovementSettings};
+use bevy_flycam::{PlayerPlugin, MovementSettings};
 
 use constants::*;
-use utils::*;
 use chunk::*;
 
 #[derive(Resource, Debug)]
@@ -64,52 +62,12 @@ fn main() {
         // .add_startup_system(generate_cube_mesh)
         .add_startup_system(generate_mesh.after(generate_world))
         .add_startup_system(setup)
-        .add_system(update_up_down)
         .add_system(rotate)
         .run();
 }
 
 #[derive(Component)]
 struct Rotate;
-
-// fn load_resources(commands: Commands, asset_server: Res<AssetServer>) {
-//     let atlas = asset_server.load("atlas.png");
-//     commands.insert_resource(atlas);
-// }
-
-fn build_cube_mesh() -> Mesh {
-    let mut mesh = Mesh::new(PrimitiveTopology::TriangleList);
-    let mut triangles: Vec<[f32; 3]> = Vec::new();
-    let mut normals: Vec<[f32; 3]> = Vec::new();
-    let mut uvs: Vec<[f32; 2]> = vec![];
-    let mut indicies: Vec<u32> = Vec::new();
-
-    for (i, face) in FACES.iter().enumerate() {
-        let u = 0.;
-        let v = 0.;
-
-        for vert in &face.vertices{
-            let v_x = vert.position[Vector::X] as f32;
-            let v_y = vert.position[Vector::Y] as f32;
-            let v_z = vert.position[Vector::Z] as f32;
-
-            triangles.push([v_x, v_y, v_z]);
-            normals.push(face.normal);
-            uvs.push([
-                (vert.uv[0] + u) * ATLAS_OFFSET / ATLAS_WIDTH,
-                (vert.uv[1] + v) * ATLAS_OFFSET / ATLAS_HEIGHT
-            ])
-        }
-    }
-
-
-    mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, triangles);
-    mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, normals);
-    mesh.insert_attribute(Mesh::ATTRIBUTE_UV_0, uvs);
-    mesh.set_indices(Some(Indices::U32(indicies)));
-
-    mesh
-}
 
 fn generate_cube_mesh(
     mut commands: Commands, 
@@ -145,11 +103,7 @@ fn generate_cube_mesh(
         Rotate,
         Wireframe
     ));
-
-
-
 }
-
 
 fn generate_world(mut game_state: ResMut<GameState>) {
     for x in 0..4 {
@@ -176,7 +130,6 @@ fn generate_mesh(
         unlit: true,
         ..default()
     });
-
 
     for (position, chunk) in game_state.chunks.iter() {
         let mut mesh_generator = ChunkMeshGenerator::new();
@@ -238,19 +191,9 @@ fn generate_mesh(
             Wireframe,
         ));
     }
-
 }
 
-
-
-
-#[derive(Component)]
-struct UpDown;
-
-
 fn setup(mut commands: Commands) {
-    let generator = ChunkMeshGenerator::new();
-
     commands.spawn(PointLightBundle {
         point_light: PointLight {
             intensity: 9000.0,
@@ -262,14 +205,6 @@ fn setup(mut commands: Commands) {
         ..default()
     });
 }
-
-fn update_up_down(mut q: Query<&mut Transform, With<UpDown>>, time: Res<Time>) {
-    let y = time.elapsed_seconds().sin() * 20.;
-    for mut t in &mut q {
-        t.look_at(Vec3::new(0., 0., 0.), Vec3::new(0., 1., 0.));
-        t.translation = Vec3::new(-30., y, 50.)
-    }
- }
 
 fn rotate(mut q: Query<(&Rotate, &mut Transform)>, timer: Res<Time>) {
     for (_, mut transform) in &mut q {
