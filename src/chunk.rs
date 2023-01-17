@@ -1,5 +1,5 @@
 use bevy::{prelude::Mesh, render::{render_resource::PrimitiveTopology, mesh::Indices}};
-use crate::constants::*;
+use crate::{constants::*, config::noise::AMP};
 use noise::{ Perlin, NoiseFn };
 
 pub struct ChunkGenerator {
@@ -92,19 +92,27 @@ impl Chunk {
         }
     }
 
-    pub fn generate(&mut self, chunk_x: usize, chunk_z: usize) -> Vec<Block> {
+    pub fn generate(chunk_x: usize, chunk_z: usize) -> Self {
+        const AMPLITUDE: f64 = 16.;
+        const MIN_Y: f64 = 50.;
         let mut voxels = Vec::new();
         let perlin = Perlin::new(123);
+        let scale: f64 = 0.027;
 
-        for (i, _) in self.voxels.iter().enumerate() {
+
+        for i in 0..CHUNK_MAX_BLOCK {
             let (x, y, z) = Self::get_local_coord(i as u64);
+            let x_offset = (chunk_x * CHUNK_WIDTH as usize) as f64;
+            let z_offset = (chunk_z * CHUNK_LENGTH as usize) as f64;
+            let n_x = (x + x_offset) * scale;
+            let n_z = (z + z_offset) * scale;
+            let mut height = perlin.get([n_x, n_z]) * 8.;
+            height += MIN_Y;
+            height += perlin.get([n_x, n_z]) * AMPLITUDE / 2.;
+            height += perlin.get([n_x, n_z]) * AMPLITUDE / 4.;
+            height += perlin.get([n_x, n_z]) * AMPLITUDE / 8.;
 
-            let scale: f64 = 0.009;
-            let n_x = (x * chunk_x as f64) * scale;
-            let n_z = (z *  chunk_z as f64) * scale;
-            let height = perlin.get([n_x, n_z]) * CHUNK_HEIGHT as f64;
-
-            if y < height * 0.5 {
+            if y < height {
                 voxels.push(Block {
                     kind: BlockKind::GRASS,
                     is_placed: false,
@@ -117,7 +125,7 @@ impl Chunk {
             }
         }
 
-        voxels
+        Chunk {voxels}
     }
 
     pub fn get_index(coord: (f64, f64, f64)) -> usize {

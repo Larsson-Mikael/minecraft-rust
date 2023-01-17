@@ -100,16 +100,13 @@ fn generate_cube_mesh(
             ..default()
         },
         Rotate,
-        Wireframe
     ));
 }
 
 fn generate_world(mut game_state: ResMut<GameState>) {
-    for x in 0..4 {
-        for z in 0..4 {
-            let mut chunk = Chunk::new();
-            let voxels = chunk.generate(x, z);
-            chunk.voxels = voxels;
+    for x in 0..16 {
+        for z in 0..16 {
+            let chunk = Chunk::generate(x, z);
             game_state.chunks.insert([x, z], chunk);
         }
     }
@@ -187,7 +184,6 @@ fn generate_mesh(
                 },
                 ..default()
             },
-            Wireframe,
         ));
     }
 }
