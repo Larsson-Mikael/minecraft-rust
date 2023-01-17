@@ -77,21 +77,6 @@ pub struct Chunk {
 }
 
 impl Chunk {
-    pub fn new() -> Self {
-
-        let size = CHUNK_WIDTH * CHUNK_LENGTH * CHUNK_HEIGHT;
-        let voxels = (0..size).map(|_| {
-            Block {
-                kind: BlockKind::GRASS,
-                is_placed: false,
-            }
-        })
-        .collect();
-        Chunk {
-            voxels
-        }
-    }
-
     pub fn generate(chunk_x: usize, chunk_z: usize) -> Self {
         const AMPLITUDE: f64 = 16.;
         const MIN_Y: f64 = 50.;
