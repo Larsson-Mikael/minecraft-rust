@@ -1,4 +1,4 @@
-use std::ops::Index;
+use std::ops::{Index, self};
 
 impl Index<&FaceKind> for [Face; 6] {
     type Output = Face;
@@ -33,6 +33,14 @@ pub enum Vector {
 
 impl Index<Vector> for [f32; 3] {
     type Output = f32;
+
+    fn index(&self, index: Vector) -> &Self::Output {
+        &self[index as usize]
+    }
+}
+
+impl Index<Vector> for [f64; 3] {
+    type Output = f64;
 
     fn index(&self, index: Vector) -> &Self::Output {
         &self[index as usize]

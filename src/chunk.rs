@@ -2,11 +2,7 @@ use std::ops::Add;
 
 use bevy::{prelude::Mesh, render::{render_resource::PrimitiveTopology, mesh::Indices}};
 use crate::constants::*;
-use noise::{
-    core::perlin::{perlin_2d, perlin_3d}, 
-    permutationtable::PermutationTable, 
-    core::simplex::simplex_3d,
-};
+use noise::{ Perlin, Seedable, NoiseFn };
 
 pub struct ChunkGenerator {
     position: [f64; 3],
@@ -40,8 +36,8 @@ impl MeshBuilder for ChunkMeshGenerator {
 
         let face: &Face = &FACES[face_kind];
         let tex_coord = block_kind.get_tex_coord(&face.kind);
-        let x_offset = (CHUNK_WIDTH/ 2) as f32;
-        let z_offset = (CHUNK_LENGTH / 2) as f32;
+        let x_offset = (CHUNK_LENGTH / 2) as f32;
+        let z_offset = (CHUNK_WIDTH / 2) as f32;
 
         for vert in &face.vertices  {
             let x = vert.position[Vector::X] + coord[Vector::X] - x_offset; 
@@ -74,78 +70,89 @@ impl MeshBuilder for ChunkMeshGenerator {
     }
 }
 
-impl ChunkGenerator {
+
+
+
+#[derive(Debug)]
+pub struct Chunk {
+    pub voxels: Vec<Block>,
+}
+
+impl Chunk {
     pub fn new() -> Self {
-        ChunkGenerator {
-            position: [0., 0., 0.],
-            heightmap: vec![]
+
+        let size = CHUNK_WIDTH * CHUNK_LENGTH * CHUNK_HEIGHT;
+        let voxels = (0..size).map(|_| {
+            Block {
+                kind: BlockKind::GRASS,
+                is_placed: false,
+            }
+        })
+        .collect();
+        Chunk {
+            voxels
         }
     }
 
-    pub fn generate(&self, chunk_x: u64, chunk_z: u64) -> BlockArray {
-        let mut blocks = Vec::new();
-        let hasher = PermutationTable::new(0);
+    pub fn generate(&mut self, chunk_x: usize, chunk_z: usize) -> Vec<Block> {
+        let mut voxels = Vec::new();
+        let perlin = Perlin::new(123);
 
+        for (i, _) in self.voxels.iter().enumerate() {
+            let (x, y, z) = Self::get_local_coord(i as u64);
 
-        for y in 0..CHUNK_HEIGHT {
-            for z in 0..CHUNK_WIDTH {
-                for x in 0..CHUNK_LENGTH {
-                    let n_x = (x * chunk_x) as f64 / CHUNK_LENGTH as f64;
-                    let n_y = y as f64 / CHUNK_HEIGHT as f64;
-                    let n_z = (z * chunk_z) as f64  / CHUNK_WIDTH as f64;
-                    let mut height = perlin_2d([n_x, n_z], &hasher) * CHUNK_HEIGHT as f64;
-                    let val = perlin_3d([n_x, n_y, n_z], &hasher);
+            let scale: f64 = 0.009;
+            let n_x = (x * chunk_x as f64) * scale;
+            let n_z = (z *  chunk_z as f64) * scale;
+            let height = perlin.get([n_x, n_z]) * CHUNK_HEIGHT as f64;
 
-                    if val > 0.1 {
-                        blocks.push(Block {
-                            kind: BlockKind::GRASS,
-                            is_placed: false,
-                        });
-                    } else {
-                        blocks.push(Block {
-                            kind: BlockKind::AIR,
-                            is_placed: false,
-                        });
-                    }
-
-                }
+            if y < height * 0.5 {
+                voxels.push(Block {
+                    kind: BlockKind::GRASS,
+                    is_placed: false,
+                });
+            } else {
+                voxels.push(Block {
+                    kind: BlockKind::AIR,
+                    is_placed: false,
+                });
             }
         }
 
-        BlockArray {blocks, current: 0}
+        voxels
     }
-}
 
-#[derive(Debug)]
-pub struct BlockArray {
-    pub blocks: Vec<Block>,
-    current: usize,
-}
+    pub fn get_index(coord: (f64, f64, f64)) -> usize {
+        let x_max: f64 = CHUNK_WIDTH as f64;
+        let z_max: f64 = CHUNK_LENGTH  as f64;
+        let (x, y, z) = coord;
 
-impl BlockArray {
-    pub fn get_block(&self, x: f64, y: f64, z: f64) -> Option<&Block> {
-        if x >= CHUNK_LENGTH as f64 || 
+        ((y * x_max * z_max) + (z * x_max) + x) as usize
+    }
+
+    pub fn get_local_coord(index: u64) -> (f64, f64, f64) {
+        let y = index as u64 / (CHUNK_WIDTH * CHUNK_LENGTH);
+        let i = index - y  * (CHUNK_WIDTH * CHUNK_LENGTH);
+        let x = i as u64 % CHUNK_WIDTH;
+        let z = i as u64 / CHUNK_LENGTH;
+
+        (x as f64, y as f64, z as f64)
+    }
+
+    pub fn get_voxel(&self, coord: (f64, f64, f64)) -> Option<&Block> {
+        let (x, y, z) = coord;
+
+        if x >= CHUNK_WIDTH as f64 || 
         y >= CHUNK_HEIGHT as f64 || 
-        z >= CHUNK_WIDTH as f64 || 
+        z >= CHUNK_LENGTH as f64 || 
         x < 0. || 
         y < 0. || 
         z < 0. {
             return None
         }
 
-        let index = Self::to_1d(x, y, z);
-        Some(&self.blocks[index])
-    }
-
-    pub fn set_block(&mut self, x: f64, y: f64, z: f64, block: Block) {
-        let index = Self::to_1d(x, y, z);
-        self.blocks[index] = block;
-    }
-
-    fn to_1d(x: f64, y: f64, z: f64) -> usize {
-        let x_max: f64 = CHUNK_LENGTH as f64;
-        let z_max: f64 = CHUNK_WIDTH as f64;
-        ((y * x_max * z_max) + (z * x_max) + x) as usize
+        let index = Self::get_index(coord);
+        Some(&self.voxels[index])
     }
 }
 
@@ -153,6 +160,12 @@ impl BlockArray {
 pub struct Block {
     pub kind: BlockKind,
     pub is_placed: bool,
+}
+
+impl Block {
+    fn new(kind: BlockKind, is_placed: bool) -> Self {
+        Self {kind, is_placed}
+    }
 }
 
 #[derive(Debug, PartialEq, Eq)]

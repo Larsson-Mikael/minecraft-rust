@@ -21,7 +21,7 @@ use chunk::*;
 #[derive(Resource, Debug)]
 struct GameState {
     seed: String,
-    chunks: HashMap<[u64; 2], BlockArray>
+    chunks: HashMap<[usize; 2], Chunk>
 }
 
 fn main() {
@@ -152,12 +152,12 @@ fn generate_cube_mesh(
 
 
 fn generate_world(mut game_state: ResMut<GameState>) {
-    let generator = ChunkGenerator::new();
-
     for x in 0..4 {
         for z in 0..4 {
-            let block_array = generator.generate(x, z);
-            game_state.chunks.insert([x, z], block_array);
+            let mut chunk = Chunk::new();
+            let voxels = chunk.generate(x, z);
+            chunk.voxels = voxels;
+            game_state.chunks.insert([x, z], chunk);
         }
     }
 }
@@ -180,47 +180,46 @@ fn generate_mesh(
 
     for (position, chunk) in game_state.chunks.iter() {
         let mut mesh_generator = ChunkMeshGenerator::new();
-        let chunk_x: f32 = (position[0] * CHUNK_LENGTH) as f32;
-        let chunk_z: f32 = (position[1] * CHUNK_WIDTH) as f32;
+        let chunk_x: f32 = (position[0] as u64 * CHUNK_WIDTH) as f32;
+        let chunk_z: f32 = (position[1] as u64 * CHUNK_LENGTH) as f32;
 
-        for y in 0..CHUNK_HEIGHT {
-            for z in 0..CHUNK_WIDTH {
-                for x in 0..CHUNK_LENGTH {
-                    let pos = Vec3::from([x as f32, y as f32, z as f32]);
-                    let current_block = chunk.get_block(pos.x.into(), pos.y.into(), pos.z.into()).unwrap();
+        for (i, voxel) in chunk.voxels.iter().enumerate() {
+            let (x, y, z)  = Chunk::get_local_coord(i as u64);
 
-                    if current_block.kind == BlockKind::AIR {
-                        continue;
-                    }
+            if voxel.kind == BlockKind::AIR {
+                continue;
+            }
 
-                    for i in 0..FACES.len() {
-                        let face = &FACES[i];
-                        let normal = Vec3::from(face.normal);
-                        let dir = pos.add(normal);
+            for i in 0..FACES.len() {
+                let face = &FACES[i];
+                let dir = [
+                    x + face.normal[Vector::X] as f64,
+                    y + face.normal[Vector::Y] as f64,
+                    z + face.normal[Vector::Z] as f64,
+                ];
 
-                        if !OPTIMIZED_MESH {
-                            mesh_generator.add_face([x as f32, y as f32, z as f32], &face.kind, &current_block.kind);
-                            break;
-                        }
+                if !OPTIMIZED_MESH {
+                    mesh_generator.add_face([x as f32, y as f32, z as f32], &face.kind, &voxel.kind);
+                    break;
+                }
 
-                        let neighbor = chunk.get_block(dir.x.into(), dir.y.into(), dir.z.into());
-                        match neighbor {
-                            Some(block) => {
-                                match block.kind {
-                                    BlockKind::AIR => {
-                                        mesh_generator.add_face([x as f32, y as f32, z as f32], &face.kind, &current_block.kind);
-                                        continue;
-                                    },
-                                    _ => {}
-                                }
-                            },
-                            None => {
-                                mesh_generator.add_face([x as f32, y as f32, z as f32], &face.kind, &current_block.kind);
+                let neighbor = chunk.get_voxel((dir[Vector::X], dir[Vector::Y] as f64, dir[Vector::Z]));
+                match neighbor {
+                    Some(block) => {
+                        match block.kind {
+                            BlockKind::AIR => {
+                                mesh_generator.add_face([x as f32, y as f32, z as f32], &face.kind, &voxel.kind);
                                 continue;
                             },
+                            _ => {}
                         }
-                    }
+                    },
+                    None => {
+                        mesh_generator.add_face([x as f32, y as f32, z as f32], &face.kind, &voxel.kind);
+                        continue;
+                    },
                 }
+
             }
         }
 
