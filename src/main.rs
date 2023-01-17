@@ -1,6 +1,5 @@
 mod constants;
 mod config;
-mod utils;
 mod chunk;
 
 use std::{collections::HashMap};
