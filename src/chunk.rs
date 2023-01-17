@@ -38,16 +38,23 @@ impl MeshBuilder for ChunkMeshGenerator {
         let z_offset = (CHUNK_WIDTH / 2) as f32;
 
         for vert in &face.vertices  {
-            let x = vert.position[Vector::X] + coord[Vector::X] - x_offset; 
-            let y = vert.position[Vector::Y] + coord[Vector::Y];
-            let z = vert.position[Vector::Z] + coord[Vector::Z] - z_offset;
+            let verts = [
+                vert.position.0 + coord[Vector::X] - x_offset,
+                vert.position.1 + coord[Vector::Y],
+                vert.position.2 + coord[Vector::Z] - z_offset,
+            ];
 
-            let u = ((vert.uv[0] + tex_coord[0]) * ATLAS_OFFSET / ATLAS_WIDTH) as f32;
-            let v = ((vert.uv[1] + tex_coord[1]) * ATLAS_OFFSET / ATLAS_HEIGHT) as f32;
+            let uv = [
+                (vert.uv.0 + tex_coord[0]) * ATLAS_OFFSET / ATLAS_WIDTH, 
+                (vert.uv.1 + tex_coord[1]) * ATLAS_OFFSET / ATLAS_HEIGHT, 
+            ];
 
-            self.vertices.push([x, y, z]);
-            self.normals.push(face.normal);
-            self.uvs.push([u, v]);
+
+            let (n_x, n_y, n_z) = face.normal;
+
+            self.vertices.push(verts);
+            self.normals.push([n_x, n_y, n_z]);
+            self.uvs.push(uv);
         }
 
         let offset = 4 * self.face_count;
@@ -64,7 +71,6 @@ impl MeshBuilder for ChunkMeshGenerator {
         mesh.set_indices(Some(Indices::U32(self.indicies)));
 
         mesh
-
     }
 }
 

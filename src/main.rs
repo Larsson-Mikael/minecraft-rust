@@ -10,7 +10,7 @@ use bevy::{
     render::{render_resource::PrimitiveTopology, settings::{WgpuSettings, WgpuFeatures}},
     render::{mesh::Indices}, log::{LogPlugin, Level},
 };
-use bevy_flycam::{PlayerPlugin, MovementSettings};
+use bevy_flycam::{PlayerPlugin, MovementSettings, FlyCam};
 
 use constants::*;
 use chunk::*;
@@ -104,8 +104,8 @@ fn generate_cube_mesh(
 }
 
 fn generate_world(mut game_state: ResMut<GameState>) {
-    for x in 0..16 {
-        for z in 0..16 {
+    for x in 0..4 {
+        for z in 0..4 {
             let chunk = Chunk::generate(x, z);
             game_state.chunks.insert([x, z], chunk);
         }
@@ -128,57 +128,18 @@ fn generate_mesh(
     });
 
     for (position, chunk) in game_state.chunks.iter() {
-        let mut mesh_generator = ChunkMeshGenerator::new();
-        let chunk_x: f32 = (position[0] as u64 * CHUNK_WIDTH) as f32;
-        let chunk_z: f32 = (position[1] as u64 * CHUNK_LENGTH) as f32;
 
-        for (i, voxel) in chunk.voxels.iter().enumerate() {
-            let (x, y, z)  = Chunk::get_local_coord(i as u64);
+        let mesh = generate_chunk_mesh(position, chunk);
+        let chunk_x = (position[0] * CHUNK_WIDTH as usize) as f32;
+        let chunk_z = (position[1] * CHUNK_WIDTH as usize) as f32;
 
-            if voxel.kind == BlockKind::AIR {
-                continue;
-            }
 
-            for i in 0..FACES.len() {
-                let face = &FACES[i];
-                let dir = [
-                    x + face.normal[Vector::X] as f64,
-                    y + face.normal[Vector::Y] as f64,
-                    z + face.normal[Vector::Z] as f64,
-                ];
-
-                if !OPTIMIZED_MESH {
-                    mesh_generator.add_face([x as f32, y as f32, z as f32], &face.kind, &voxel.kind);
-                    break;
-                }
-
-                let neighbor = chunk.get_voxel((dir[Vector::X], dir[Vector::Y] as f64, dir[Vector::Z]));
-                match neighbor {
-                    Some(block) => {
-                        match block.kind {
-                            BlockKind::AIR => {
-                                mesh_generator.add_face([x as f32, y as f32, z as f32], &face.kind, &voxel.kind);
-                                continue;
-                            },
-                            _ => {}
-                        }
-                    },
-                    None => {
-                        mesh_generator.add_face([x as f32, y as f32, z as f32], &face.kind, &voxel.kind);
-                        continue;
-                    },
-                }
-
-            }
-        }
-
-        println!("FACE COUNT: {}", mesh_generator.face_count);
         commands.spawn((
             PbrBundle {
-                mesh: meshes.add(mesh_generator.build()),
+                mesh: meshes.add(mesh),
                 material: material.clone(),
                 transform: Transform {
-                    translation: Vec3::new(chunk_x - CHUNK_LENGTH as f32 / 2., 0., chunk_z - CHUNK_WIDTH as f32),
+                    translation: Vec3::new(chunk_x as f32 - CHUNK_LENGTH as f32 / 2., 0., chunk_z - CHUNK_WIDTH as f32),
                     rotation: Quat::from_euler(EulerRot::XYZ, 0., 0., 0.),
                     scale: Vec3::new(1., 1., 1.)
                 },
@@ -187,6 +148,58 @@ fn generate_mesh(
         ));
     }
 }
+
+fn generate_chunk_mesh(position: &[usize; 2], chunk: &Chunk) -> Mesh {
+
+    let mut mesh_generator = ChunkMeshGenerator::new();
+    let chunk_x: f32 = (position[0] as u64 * CHUNK_WIDTH) as f32;
+    let chunk_z: f32 = (position[1] as u64 * CHUNK_LENGTH) as f32;
+
+    for (i, voxel) in chunk.voxels.iter().enumerate() {
+        let (x, y, z)  = Chunk::get_local_coord(i as u64);
+
+        if voxel.kind == BlockKind::AIR {
+            continue;
+        }
+
+        for i in 0..FACES.len() {
+            let face = &FACES[i];
+            let dir = [
+                x + face.normal.0 as f64,
+                y + face.normal.1 as f64,
+                z + face.normal.2 as f64,
+            ];
+
+            if !OPTIMIZED_MESH {
+                mesh_generator.add_face([x as f32, y as f32, z as f32], &face.kind, &voxel.kind);
+                break;
+            }
+
+            let neighbor = chunk.get_voxel((dir[Vector::X], dir[Vector::Y] as f64, dir[Vector::Z]));
+            match neighbor {
+                Some(block) => {
+                    match block.kind {
+                        BlockKind::AIR => {
+                            mesh_generator.add_face([x as f32, y as f32, z as f32], &face.kind, &voxel.kind);
+                            continue;
+                        },
+                        _ => {}
+                    }
+                },
+                None => {
+                    mesh_generator.add_face([x as f32, y as f32, z as f32], &face.kind, &voxel.kind);
+                    continue;
+                },
+            }
+
+        }
+    }
+
+    println!("FACE COUNT: {}", mesh_generator.face_count);
+    mesh_generator.build()
+}
+
+
 
 fn setup(mut commands: Commands) {
     commands.spawn(PointLightBundle {

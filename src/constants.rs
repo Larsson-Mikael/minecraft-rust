@@ -75,62 +75,62 @@ pub const TRIANGLES: [u32; 6] = [0, 1, 2, 2, 1, 3];
 pub const FACES: [Face; 6] = [
     Face {
         kind: FaceKind::Left,
-        normal: [-1., 0., 0.],
+        normal: (-1., 0., 0.),
         vertices: [
-            Vertex {position: [-0.5, -0.5, -0.5], uv: [0., 1.]}, // bl
-            Vertex {position: [-0.5, -0.5, 0.5], uv: [1., 1.]}, // br
-            Vertex {position: [-0.5, 0.5, -0.5], uv: [0., 0.]}, // tl
-            Vertex {position: [-0.5, 0.5, 0.5], uv: [1., 0.]}, // tr
+            Vertex {position: (-0.5, -0.5, -0.5), uv: (0., 1.)}, // bl
+            Vertex {position: (-0.5, -0.5, 0.5), uv: (1., 1.)}, // br
+            Vertex {position: (-0.5, 0.5, -0.5), uv: (0., 0.)}, // tl
+            Vertex {position: (-0.5, 0.5, 0.5), uv: (1., 0.)}, // tr
         ]
     },
     Face {
         kind: FaceKind::Right,
-        normal: [1., 0., 0.],
+        normal: (1., 0., 0.),
         vertices: [
-            Vertex {position: [0.5, -0.5, 0.5], uv: [0., 1.]}, // bl
-            Vertex {position: [0.5, -0.5, -0.5], uv: [1., 1.]}, // br
-            Vertex {position: [0.5, 0.5, 0.5], uv: [0., 0.]}, // tl
-            Vertex {position: [0.5, 0.5, -0.5], uv: [1., 0.]}, // tr
+            Vertex {position: (0.5, -0.5, 0.5), uv: (0., 1.)}, // bl
+            Vertex {position: (0.5, -0.5, -0.5), uv: (1., 1.)}, // br
+            Vertex {position: (0.5, 0.5, 0.5), uv: (0., 0.)}, // tl
+            Vertex {position: (0.5, 0.5, -0.5), uv: (1., 0.)}, // tr
         ]
     },
     Face {
         kind: FaceKind::Front,
-        normal: [0., 0., 1.],
+        normal: (0., 0., 1.),
         vertices: [
-            Vertex {position: [-0.5, -0.5, 0.5], uv: [0., 1.]}, // bl
-            Vertex {position: [0.5, -0.5, 0.5], uv: [1., 1.]}, // br
-            Vertex {position: [-0.5, 0.5, 0.5], uv: [0., 0.]}, // tl
-            Vertex {position: [0.5, 0.5, 0.5], uv: [1., 0.]}, // tr
+            Vertex {position: (-0.5, -0.5, 0.5), uv: (0., 1.)}, // bl
+            Vertex {position: (0.5, -0.5, 0.5), uv: (1., 1.)}, // br
+            Vertex {position: (-0.5, 0.5, 0.5), uv: (0., 0.)}, // tl
+            Vertex {position: (0.5, 0.5, 0.5), uv: (1., 0.)}, // tr
         ]
     },
     Face {
         kind: FaceKind::Back,
-        normal: [0., 0., -1.],
+        normal: (0., 0., -1.),
         vertices: [
-            Vertex {position: [0.5, -0.5, -0.5], uv: [0., 1.]}, // bl
-            Vertex {position: [-0.5, -0.5, -0.5], uv: [1., 1.]}, // br
-            Vertex {position: [0.5, 0.5, -0.5], uv: [0., 0.]}, // tl
-            Vertex {position: [-0.5, 0.5, -0.5], uv: [1., 0.]}, // tr
+            Vertex {position: (0.5, -0.5, -0.5), uv: (0., 1.)}, // bl
+            Vertex {position: (-0.5, -0.5, -0.5), uv: (1., 1.)}, // br
+            Vertex {position: (0.5, 0.5, -0.5), uv: (0., 0.)}, // tl
+            Vertex {position: (-0.5, 0.5, -0.5), uv: (1., 0.)}, // tr
         ]
     },
     Face {
         kind: FaceKind::Top,
-        normal: [0., 1., 0.],
+        normal: (0., 1., 0.),
         vertices: [
-            Vertex {position: [-0.5, 0.5, 0.5], uv: [0., 1.]}, // bl
-            Vertex {position: [0.5, 0.5, 0.5], uv: [1., 1.]}, // br
-            Vertex {position: [-0.5, 0.5, -0.5], uv: [0., 0.]}, // tl
-            Vertex {position: [0.5, 0.5, -0.5], uv: [1., 0.]}, // tr
+            Vertex {position: (-0.5, 0.5, 0.5), uv: (0., 1.)}, // bl
+            Vertex {position: (0.5, 0.5, 0.5), uv: (1., 1.)}, // br
+            Vertex {position: (-0.5, 0.5, -0.5), uv: (0., 0.)}, // tl
+            Vertex {position: (0.5, 0.5, -0.5), uv: (1., 0.)}, // tr
         ]
     },
     Face {
         kind: FaceKind::Bottom,
-        normal: [0., -1., 0.],
+        normal: (0., -1., 0.),
         vertices: [
-            Vertex {position: [-0.5, -0.5, -0.5], uv: [0., 1.]}, // bl
-            Vertex {position: [0.5, -0.5, -0.5], uv: [1., 1.]}, // br
-            Vertex {position: [-0.5, -0.5, 0.5], uv: [0., 0.]}, // tl
-            Vertex {position: [0.5, -0.5, 0.5], uv: [1., 0.]}, // tr
+            Vertex {position: (-0.5, -0.5, -0.5), uv: (0., 1.)}, // bl
+            Vertex {position: (0.5, -0.5, -0.5), uv: (1., 1.)}, // br
+            Vertex {position: (-0.5, -0.5, 0.5), uv: (0., 0.)}, // tl
+            Vertex {position: (0.5, -0.5, 0.5), uv: (1., 0.)}, // tr
         ]
     },
 ];
@@ -141,8 +141,8 @@ pub const ATLAS_OFFSET: f32 = 32.;
 
 pub const CHUNK_LENGTH: u64 = 64;
 pub const CHUNK_WIDTH: u64 = 64;
-pub const CHUNK_HEIGHT: u64 = 256;
-pub const CHUNK_MAX_BLOCK: u64 = CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_LENGTH;
+pub const CHUNK_HEIGHT: u64 = 128;
+pub const CHUNK_MAX_BLOCK: u64 = CHUNK_WIDTH * CHUNK_LENGTH * CHUNK_HEIGHT;
 
 
 pub const OPTIMIZED_MESH: bool = true;
@@ -150,13 +150,13 @@ pub const OPTIMIZED_MESH: bool = true;
 
 pub struct Face {
     pub kind: FaceKind,
-    pub normal: [f32; 3],
+    pub normal: (f32, f32, f32),
     pub vertices: [Vertex; 4]
 }
 
 pub struct Vertex {
-    pub position: [f32; 3],
-    pub uv: [f32; 2],
+    pub position: (f32, f32, f32),
+    pub uv: (f32, f32),
 
 }
 
